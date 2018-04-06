@@ -15,6 +15,7 @@ public class Main {
 		gen.end();
 
 		graph.display(false); // Node position is provided.
+		// test moric
 	}
 
 }
