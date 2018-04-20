@@ -11,10 +11,11 @@ public class Simulation {
 		Node randomNode = Toolkit.randomNode(blockchain);
 		for(Edge edge : randomNode) {
 			Node neighborNode = edge.getOpposite(randomNode);
-			do while( == ) {
-				Node randomNeighborNode = Toolkit.randomNode(blockchain);
-				blockchain.addEdge(null, neighborNode, randomNeighborNode);
-			}
+			Node randomNeighborNode;
+			do {
+				randomNeighborNode = Toolkit.randomNode(blockchain);
+			} while(randomNeighborNode == randomNode);
+			blockchain.addEdge(null, neighborNode, randomNeighborNode);
 		}
 		blockchain.removeNode(randomNode);
 	}
