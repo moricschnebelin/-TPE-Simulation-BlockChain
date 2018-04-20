@@ -1,3 +1,7 @@
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import org.graphstream.algorithm.Toolkit;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
@@ -14,8 +18,8 @@ public class Simulation {
 			Node randomNeighborNode;
 			do {
 				randomNeighborNode = Toolkit.randomNode(blockchain);
-			} while(randomNeighborNode == randomNode);
-			blockchain.addEdge(null, neighborNode, randomNeighborNode);
+			} while(randomNeighborNode == randomNode || randomNeighborNode == neighborNode);
+			blockchain.addEdge(LocalDate.now(Clock.systemUTC()).toString().concat(":"+LocalTime.now(Clock.systemUTC()).toString()).replaceAll("[-.]", ":"), neighborNode, randomNeighborNode);
 		}
 		blockchain.removeNode(randomNode);
 	}
