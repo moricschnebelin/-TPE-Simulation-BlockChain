@@ -8,4 +8,8 @@ public class DiffuseBlock extends Message {
 		this.block = block;
 	}
 	
+	Block GetBlock() {
+		return this.block;
+	}
+	
 }

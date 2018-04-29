@@ -8,4 +8,13 @@ public class Message {
 		this.sender = sender;
 		this.flag = flag;
 	}
+	
+	String GetSender() {
+		return this.sender;
+	}
+	
+	String GetFlag() {
+		return this.flag;
+	}
+	
 }

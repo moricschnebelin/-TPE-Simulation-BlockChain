@@ -7,5 +7,9 @@ public class DiffuseData extends Message {
 		super(sender, flag);
 		this.data = data;
 	}
-
+	
+	String GetData() {
+		return this.data;
+	}
+	
 }

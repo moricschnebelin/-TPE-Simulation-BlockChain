@@ -7,5 +7,9 @@ public class RequestBlock extends Message {
 		super(sender, flag);
 		this.blockNumber = blockNumber;
 	}
-
+	
+	Integer GetBlockNumber() {
+		return this.blockNumber;
+	}
+	
 }
