@@ -19,6 +19,8 @@ public class Nodes {
 			return neighbors.get(ThreadLocalRandom.current().nextInt(neighbors.size()));
 		}
 		
+		
+		
 		public void run() {
 			blockchain.add(new Block("","0000000000000000000000000000000000000000000000000000000000000000"));	//genesis block
 			if(neighbors.size() == 0) {	//partie du code ignorer par les noeuds initiaux
@@ -39,7 +41,7 @@ public class Nodes {
 					}
 				}
 				while(DiffuseBlock.GetBlock() != null) {	//tant que le noeud ne possede pas tous les bloc de la blockchain, il les demande consecutivement parmis ses voisins de maniere aleatoire
-					for(Thread thread : getAllThreads())
+					for(Thread thread :)
 						thread(GetRandomNeighbor()).messageQueue.put(new RequestBlock(thisNode, "sync", blockchain.size() - 1));
 				}
 			}
