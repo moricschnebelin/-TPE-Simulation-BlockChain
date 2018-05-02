@@ -40,10 +40,11 @@ public class Nodes {
 						}
 					}
 				}
-				while(DiffuseBlock.GetBlock() != null) {	//tant que le noeud ne possede pas tous les bloc de la blockchain, il les demande consecutivement parmis ses voisins de maniere aleatoire
+				/*while(DiffuseBlock.GetBlock() != null) {	//tant que le noeud ne possede pas tous les bloc de la blockchain, il les demande consecutivement parmis ses voisins de maniere aleatoire
 					for(Thread thread :)
 						thread(GetRandomNeighbor()).messageQueue.put(new RequestBlock(thisNode, "sync", blockchain.size() - 1));
-				}
+						
+				}*/
 			}
 			while(true) {
 				while((message = messageQueue.poll()) != null) {	//si il y a des message en attente
