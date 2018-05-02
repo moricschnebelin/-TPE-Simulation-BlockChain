@@ -2,26 +2,45 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-
+import java.util.concurrent.ThreadLocalRandom;
 import org.graphstream.algorithm.Toolkit;
 
 public class Nodes {
 	
 	static class Node implements Runnable {
 		
+		String thisNode = Thread.currentThread().getName();
 		BlockingQueue<Message> messageQueue = new LinkedBlockingQueue<Message>();
 		Message message;
 		List<String> neighbors = new ArrayList<String>();
 		List<Block> blockchain = new ArrayList<Block>();
 		
+		String GetRandomNeighbor() {
+			return neighbors.get(ThreadLocalRandom.current().nextInt(neighbors.size()));
+		}
+		
 		public void run() {
-			blockchain.add(new Block("","0000000000000000000000000000000000000000000000000000000000000000"));	//genesis bloc
-			if(neighbors.size() == 0) {	//partie de code ignorer par les noeuds initiaux
-				while(neighbors.size() < 2) {	//tant que le noeud n'a pas 2 liaison il cree des lien aleatoire
-					Toolkit.randomNode(Initialisation.blockchain);
+			blockchain.add(new Block("","0000000000000000000000000000000000000000000000000000000000000000"));	//genesis block
+			if(neighbors.size() == 0) {	//partie du code ignorer par les noeuds initiaux
+				while(neighbors.size() < 2) {	//tant que le noeud ne possede pas n liaison, il les cree avec d'autre noeud aleatoire du reseau
+					String randomNode = Toolkit.randomNode(Initialisation.blockchain).getId();
+					if(randomNode != thisNode) {
+						boolean validNode = true;
+						for(String neighbor : neighbors) {
+							if(randomNode == neighbor) {
+								validNode = false;
+								break;
+							}
+						}
+						if(validNode == true) {
+							neighbors.add(randomNode);
+							Initialisation.blockchain.addEdge(Initialisation.GenerateId(), thisNode, randomNode);
+						}
+					}
 				}
-				while() {	//tant que le noeud na pas tous les bloc, demander bloc aux voisin
-					
+				while(DiffuseBlock.GetBlock() != null) {	//tant que le noeud ne possede pas tous les bloc de la blockchain, il les demande consecutivement parmis ses voisins de maniere aleatoire
+					for(Thread thread : getAllThreads())
+						thread(GetRandomNeighbor()).messageQueue.put(new RequestBlock(thisNode, "sync", blockchain.size() - 1));
 				}
 			}
 			while(true) {
