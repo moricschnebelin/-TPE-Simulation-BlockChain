@@ -1,5 +1,5 @@
 
-public class DiffuseBlock extends Message {
+class DiffuseBlock extends Message {
 
 	static Block block;	//block a transmettre
 	

@@ -1,7 +1,7 @@
 
-public class RequestBlock extends Message {
+class RequestBlock extends Message {
 
-	public Integer blockNumber;	//numero de bloc demander
+	Integer blockNumber;	//numero de bloc demander
 	
 	RequestBlock(String sender, String flag, Integer blockNumber) {
 		super(sender, flag);

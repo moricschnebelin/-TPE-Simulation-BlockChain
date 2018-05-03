@@ -1,20 +1,14 @@
 
-public class Block {
+class Block {
 	
-	public Integer nonce;
-	public String data;
-	public String previousHash;
-	public String currentHash;
+	Integer nonce;	//entier unique
+	String data;	//chainde de transaction integré au bloc separer par un pointeur
+	String hash;	//hash du bloc courant
 	
-	Block(String data, String previousHash) {
-		this.nonce = 0;
-		this.data = data;
-		this.previousHash = previousHash;
-		this.currentHash = "";
-	}
-	
-	void SetNonce(Integer nonce) {
+	Block(Integer nonce, String data, String hash) {
 		this.nonce = nonce;
+		this.data = data;
+		this.hash = hash;
 	}
 	
 	Integer GetNonce() {
@@ -25,16 +19,8 @@ public class Block {
 		return this.data;
 	}
 	
-	String GetPreviousHash() {
-		return this.previousHash;
-	}
-	
-	void SetCurrentHash(String currentHash) {
-		this.currentHash = currentHash;
-	}
-	
-	String GetCurrentHash() {
-		return this.currentHash;
+	String GetHash() {
+		return this.hash;
 	}
 	
 }

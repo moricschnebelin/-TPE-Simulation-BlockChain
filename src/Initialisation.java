@@ -11,6 +11,7 @@ import org.graphstream.graph.implementations.SingleGraph;
 public class Initialisation {
 	
 	static Graph blockchain = new SingleGraph("Blockchain Network");
+	static ThreadGroup nodesGroup = new ThreadGroup("Nodes Group");
 	
 	static String GenerateId() {
 		return LocalDate.now(Clock.systemUTC()).toString().concat(":"+LocalTime.now(Clock.systemUTC()).toString()).replaceAll("[-.]", ":"); // annee:mois:jour:heure:minute:seconde:milliseconde
