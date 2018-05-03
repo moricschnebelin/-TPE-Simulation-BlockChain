@@ -18,11 +18,11 @@ public class Initialisation {
 	}
 	
 	static void PrimeGraph(int numberOfNodes) throws InterruptedException {	//initialisation du graph avec un noeud primaire
-		
 		//création des noeuds
 		for(int i = 0; i < numberOfNodes; i++) {
 
-			blockchain.addNode(LocalDate.now(Clock.systemUTC()).toString().concat(":"+LocalTime.now(Clock.systemUTC()).toString()).replaceAll("[-.]", ":")); // annee:mois:jour:heure:minute:seconde:milliseconde
+			blockchain.addNode(GenerateId()).addAttribute("ui.label", i + "(" + GenerateId() + ")"); // annee:mois:jour:heure:minute:seconde:milliseconde
+			
 			
 			TimeUnit.MILLISECONDS.sleep(1); // attends 1 ms pour avoir un id différent pour chaque noeuds
 		}
@@ -42,7 +42,7 @@ public class Initialisation {
 						break;
 				}
 				if(nRand != n && isvoisin == false) {
-					blockchain.addEdge(LocalDate.now(Clock.systemUTC()).toString().concat(":"+LocalTime.now(Clock.systemUTC()).toString()).replaceAll("[-.]", ":"), n, nRand);
+					blockchain.addEdge(GenerateId(), n, nRand);
 					i++;
 					TimeUnit.MILLISECONDS.sleep(1); //millisecondes
 				}
