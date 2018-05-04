@@ -33,6 +33,7 @@ public class Simulation {
 	
 	static void Disconnect(int numberOfNodes) throws InterruptedException {
 		Node randomNode = Toolkit.randomNode(blockchain);
+		
 		for(Edge edge : randomNode) {
 			Node neighborNode = edge.getOpposite(randomNode);
 			Node randomNeighborNode;
@@ -41,6 +42,8 @@ public class Simulation {
 			} while(randomNeighborNode == randomNode || randomNeighborNode == neighborNode);
 
 			// a faire : evolution constante du nb d'edges
+			
+			//
 			if(!neighborNode.hasEdgeFrom(randomNeighborNode)){
 				blockchain.addEdge(GenerateId(), neighborNode, randomNeighborNode);
 				TimeUnit.MILLISECONDS.sleep(1); // attends 1 ms pour avoir un id différent pour chaque noeuds
@@ -50,11 +53,18 @@ public class Simulation {
 	}
 	
 	static void Connect(int numberOfNodes) throws InterruptedException {
+		
+		String id_newNode = GenerateId();
 		Node randomNode1 = Toolkit.randomNode(blockchain);
 		Node randomNode2 = Toolkit.randomNode(blockchain);
-		blockchain.addNode(GenerateId()).addAttribute("ui.label", "(" + GenerateId() + ")");
-		Node newNode = blockchain.getNode(GenerateId());
-
+		while(randomNode2 == randomNode1){
+			randomNode2 = Toolkit.randomNode(blockchain);
+			
+		}
+		
+		blockchain.addNode(id_newNode).addAttribute("ui.label", "(" + id_newNode + ")");
+		Node newNode = blockchain.getNode(id_newNode);
+		
 		blockchain.addEdge(GenerateId(), newNode, randomNode1);
 		TimeUnit.MILLISECONDS.sleep(1);
 		blockchain.addEdge(GenerateId(), newNode, randomNode2);
