@@ -1,3 +1,4 @@
+package message;
 
 class DiffuseData extends Message {
 

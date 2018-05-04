@@ -1,3 +1,4 @@
+package message;
 
 class RequestBlock extends Message {
 

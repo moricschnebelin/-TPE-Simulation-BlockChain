@@ -1,3 +1,4 @@
+package message;
 
 class Message {
 	
