@@ -1,4 +1,5 @@
 package main;
+
 import message.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -13,6 +14,7 @@ class Node extends Thread {
 	List<Thread> neighbors = new ArrayList<Thread>();	//liste des voisin
 	Queue<Message> messageQueue = new LinkedList<Message>();	//file d'attente FIFO de message
 	Message message;	//message a traiter
+	List<Message> waitReply = new ArrayList<Message>();	//liste de message qui attende une reponse "sync"
 	List<String> dataToIntegrate = new ArrayList<String>();	//transaction a integré dans le prochain bloc
 	List<String> dataInIntegration = new ArrayList<String>();	//transaction en cours d'integration dans le bloc courant
 	List<Block> blockchain = new ArrayList<Block>();	//chaine de bloc
@@ -55,8 +57,39 @@ class Node extends Thread {
 					}
 				}
 			}
-			while(DiffuseBlock.GetBlock() != null) {	//tant que le noeud ne possede pas tous les bloc de la blockchain, il les demande consecutivement parmis ses voisins de maniere aleatoire
-				((Node) GetRandomNeighbor()).postMessage(new RequestBlock(thisNode, "sync", blockchain.size() - 1));
+			while(Bloc.GetBlock() != null) {	//tant que le noeud ne possede pas tous les bloc de la blockchain, il les demande consecutivement parmis ses voisins de maniere aleatoire
+				((Node) GetRandomNeighbor()).postMessage(new Init(thisNode, blockchain.size() - 1));
+				while((message = messageQueue.poll()) != null) {	//traite les message en file d'attente
+					switch(message.GetFlag()) {
+						case "sync" : {
+							for(Thread neighbor : neighbors) {
+								if(message.GetSender() == neighbor.getName()) {
+									//aquitter message
+								}
+							}
+						}
+						case "data" : {
+							for(Thread neighbor : neighbors) {
+								if(message.GetSender() == neighbor.getName()) {
+									//diffuser transaction
+								}
+							}
+						}
+						case "bloc" : {
+							for(Thread neighbor : neighbors) {
+								if(message.GetSender() == neighbor.getName()) {
+									//diffuser bloc
+								}
+							}
+						}
+						case "link" : {
+							//cree lien
+						}
+						case "init" : {
+							
+						}
+					}
+				}
 			}
 		}
 		while(true) {
@@ -65,7 +98,7 @@ class Node extends Thread {
 					case "sync" : {
 						for(Thread neighbor : neighbors) {
 							if(message.GetSender() == neighbor.getName()) {
-								//envoyer bloc
+								//aquitter message
 							}
 						}
 					}
@@ -85,6 +118,9 @@ class Node extends Thread {
 					}
 					case "link" : {
 						//cree lien
+					}
+					case "init" : {
+						//transferer bloc demander
 					}
 				}
 			}

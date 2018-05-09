@@ -1,6 +1,6 @@
 package message;
 
-class Message {
+public class Message {
 	
 	String sender;	//id du noeud expediteur
 	String flag;		//type de communication
@@ -10,11 +10,11 @@ class Message {
 		this.flag = flag;
 	}
 	
-	String GetSender() {
+	public String GetSender() {
 		return this.sender;
 	}
 	
-	String GetFlag() {
+	public String GetFlag() {
 		return this.flag;
 	}
 	

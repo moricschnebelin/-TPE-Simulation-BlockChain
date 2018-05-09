@@ -1,6 +1,6 @@
 package main;
 
-class Block {
+public class Block {
 	
 	Integer nonce;	//entier unique
 	String data;	//chainde de transaction integré au bloc separer par un pointeur
