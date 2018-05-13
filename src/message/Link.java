@@ -2,8 +2,8 @@ package message;
 
 public class Link extends Message {
 
-	public Link(String sender) {
-		super(sender, "link");
+	public Link(String sender, String receiver) {
+		super(sender, receiver, "link");
 	}
 
 }

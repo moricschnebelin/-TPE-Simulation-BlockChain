@@ -1,11 +1,11 @@
 package message;
 
-public class Init extends Message {
-
+public class Requ extends Message {
+	
 	Integer blockNumber;	//numero de bloc demander
 	
-	public Init(String sender, Integer blockNumber) {
-		super(sender, "init");
+	public Requ(String sender, String receiver, Integer blockNumber) {
+		super(sender, receiver, "requ");
 		this.blockNumber = blockNumber;
 	}
 	

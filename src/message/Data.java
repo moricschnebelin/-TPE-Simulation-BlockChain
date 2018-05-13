@@ -4,8 +4,8 @@ public class Data extends Message {
 
 	String data;	//transaction a transmettre
 	
-	public Data(String sender, String data) {
-		super(sender, "data");
+	public Data(String sender, String receiver, String data) {
+		super(sender, receiver, "data");
 		this.data = data;
 	}
 	
