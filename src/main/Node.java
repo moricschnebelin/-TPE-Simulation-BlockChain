@@ -26,7 +26,7 @@ class Node extends Thread {
 	List<String> dataInArchiving = new ArrayList<String>();	//transaction en cours d'integration dans le bloc courant
 	List<Block> blockchain = new ArrayList<Block>();	//chaine de bloc
 	
-	Node getThread(String name) {	//retourne un thread correspondant au nom passer en parametre
+	Node GetThread(String name) {	//retourne un thread correspondant au nom passer en parametre
 		Thread[] threads = new Thread[Initialisation.nodesGroup.activeCount()];
 		Initialisation.nodesGroup.enumerate(threads);
 		for(Thread thread : threads) {
@@ -41,8 +41,24 @@ class Node extends Thread {
 		return (Node)(neighbors.get(ThreadLocalRandom.current().nextInt(neighbors.size())));
 	}
 	
-	void postMessage(Message message) {	//ajoute les message envoyer par les autre thread dans la file d'attente messageQueue
+	void PostMessage(Message message) {	//ajoute les message envoyer par les autre thread dans la file d'attente messageQueue
 		messageQueue.add(message);
+	}
+	
+	boolean ValidHash(String blocDigest) {	//verifie la validiter du hash, retourne true si valide, false sinon
+		String hash = null;
+		try {
+			hash = MessageDigest.getInstance("MD5").digest(blocDigest.getBytes("UTF-8")).toString();
+		} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(int header = 0; header < 4; header ++) {
+			if(hash.toCharArray()[header] != 0) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	public void run() {
@@ -59,14 +75,14 @@ class Node extends Thread {
 						}
 					}
 					if(validNode == true) {
-						neighbors.add(getThread(randomNode));
+						neighbors.add(GetThread(randomNode));
 						Initialisation.blockchain.addEdge(Initialisation.GenerateId(), thisNode, randomNode);
 					}
 				}
 			}
 			while(true) {	//tant que le noeud ne possede pas tous les bloc de la blockchain, il les demande consecutivement parmis ses voisins de maniere aleatoire
 				Node randomNeighbor = GetRandomNeighbor();
-				randomNeighbor.postMessage(new Requ(thisNode, randomNeighbor.getName(), blockchain.size()));
+				randomNeighbor.PostMessage(new Requ(thisNode, randomNeighbor.getName(), blockchain.size()));
 				while((message = messageQueue.poll()) != null) {	//traite les message en file d'attente
 					switch(message.GetFlag()) {
 						case "sync" : {
@@ -82,7 +98,7 @@ class Node extends Thread {
 								if(((Data)(message)).GetSender() == neighbor.getName()) {
 									for(Node neighbour : neighbors) {
 										if(neighbour != neighbor) {
-											neighbour.postMessage(new Data(thisNode, neighbour.getName(), ((Data)(message)).GetData()));
+											neighbour.PostMessage(new Data(thisNode, neighbour.getName(), ((Data)(message)).GetData()));
 										}
 									}
 								}
@@ -92,9 +108,15 @@ class Node extends Thread {
 						case "bloc" : {	//diffuser le bloc a ces voisin sauf celui qui en est l'emeteur
 							for(Node neighbor : neighbors) {
 								if(((Bloc)(message)).GetSender() == neighbor.getName()) {
-									for(Node neighbour : neighbors) {
-										if(neighbour != neighbor) {
-											neighbour.postMessage(new Bloc(thisNode, neighbour.getName(), ((Bloc)(message)).GetBlock()));
+									String blocDigest = "";
+									blocDigest.concat(((Bloc)(message)).GetBlock().nonce.toString());
+									blocDigest.concat(((Bloc)(message)).GetBlock().data);
+									blocDigest.concat(blockchain.get(blockchain.size() - 1).hash);
+									if(ValidHash(blocDigest) == true) {
+										for(Node neighbour : neighbors) {
+											if(neighbour != neighbor) {
+												neighbour.PostMessage(new Bloc(thisNode, neighbour.getName(), ((Bloc)(message)).GetBlock()));
+											}
 										}
 									}
 								}
@@ -107,26 +129,12 @@ class Node extends Thread {
 						}
 						case "give" : {	//ajouter le bloc a la blockchain
 							String blocDigest = "";
-							String hash = null;
-							boolean validHash = true;
 							for(Node neighbor : neighbors) {
 								if(((Give)(message)).GetSender() == neighbor.getName()) {
 									blocDigest.concat(((Give)(message)).GetBlock().nonce.toString());
 									blocDigest.concat(((Give)(message)).GetBlock().data);
 									blocDigest.concat(blockchain.get(blockchain.size() - 1).hash);
-									try {
-										hash = MessageDigest.getInstance("MD5").digest(blocDigest.getBytes("UTF-8")).toString();
-									} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-									for(int header = 0; header < 4; header ++) {
-										if(hash.toCharArray()[header] != 0) {
-											validHash = false;
-											break;
-										}
-									}
-									if(validHash == true) {
+									if(ValidHash(blocDigest) == true) {
 										blockchain.add(((Give)(message)).GetBlock());
 									}
 								}
