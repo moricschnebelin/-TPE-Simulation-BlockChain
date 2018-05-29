@@ -1,7 +1,6 @@
 package main;
 
 import message.*;
-
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -10,9 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ThreadLocalRandom;
-
-import javax.xml.bind.DatatypeConverter;
-
 import org.graphstream.algorithm.Toolkit;
 
 class Node extends Thread {
@@ -21,12 +17,12 @@ class Node extends Thread {
 	List<Node> neighbors = new ArrayList<Node>();	//liste des voisin
 	Queue<Message> messageQueue = new LinkedList<Message>();	//file d'attente FIFO de message
 	Message message;	//message a traiter
-	List<Message> waitReply = new ArrayList<Message>();	//liste de message qui attende une reponse "sync"
+	List<Message> awaitReply = new ArrayList<Message>();	//liste de message qui attende une reponse "sync"
 	List<String> dataToArchive = new ArrayList<String>();	//transaction a integré dans le prochain bloc
 	List<String> dataInArchiving = new ArrayList<String>();	//transaction en cours d'integration dans le bloc courant
 	List<Block> blockchain = new ArrayList<Block>();	//chaine de bloc
 	
-	Node GetThread(String name) {	//retourne un thread correspondant au nom passer en parametre
+	Node GetNode(String name) {	//retourne un noeud correspondant au nom passer en parametre
 		Thread[] threads = new Thread[Initialisation.nodesGroup.activeCount()];
 		Initialisation.nodesGroup.enumerate(threads);
 		for(Thread thread : threads) {
@@ -37,7 +33,7 @@ class Node extends Thread {
 		return null;
 	}
 	
-	Node GetRandomNeighbor() {	//retourne un thread voisin aleatoire
+	Node GetRandomNeighbor() {	//retourne un noeud voisin aleatoire
 		return (Node)(neighbors.get(ThreadLocalRandom.current().nextInt(neighbors.size())));
 	}
 	
@@ -75,7 +71,7 @@ class Node extends Thread {
 						}
 					}
 					if(validNode == true) {
-						neighbors.add(GetThread(randomNode));
+						neighbors.add(GetNode(randomNode));
 						Initialisation.blockchain.addEdge(Initialisation.GenerateId(), thisNode, randomNode);
 					}
 				}
@@ -83,12 +79,17 @@ class Node extends Thread {
 			while(true) {	//tant que le noeud ne possede pas tous les bloc de la blockchain, il les demande consecutivement parmis ses voisins de maniere aleatoire
 				Node randomNeighbor = GetRandomNeighbor();
 				randomNeighbor.PostMessage(new Requ(thisNode, randomNeighbor.getName(), blockchain.size()));
+				awaitReply.add(new Requ(thisNode, randomNeighbor.getName(), blockchain.size()));
 				while((message = messageQueue.poll()) != null) {	//traite les message en file d'attente
 					switch(message.GetFlag()) {
 						case "sync" : {
-							for(Node neighbor : neighbors) {
-								if(message.GetSender() == neighbor.getName()) {
-									//aquitter message
+							for(Node neighbor : neighbors) {	//aquitter le message ayant une reponse
+								if(((Sync)(message)).GetSender() == neighbor.getName()) {
+									for(Message waitReply : awaitReply) {
+										if(waitReply.GetReceiver() == ((Sync)(message)).GetSender()) {
+											awaitReply.remove(waitReply);
+										}
+									}
 								}
 							}
 							break;
@@ -99,31 +100,35 @@ class Node extends Thread {
 									for(Node neighbour : neighbors) {
 										if(neighbour != neighbor) {
 											neighbour.PostMessage(new Data(thisNode, neighbour.getName(), ((Data)(message)).GetData()));
+											awaitReply.add(new Data(thisNode, neighbour.getName(), ((Data)(message)).GetData()));
 										}
 									}
+									GetNode(((Data)(message)).GetSender()).PostMessage(new Sync(thisNode, ((Data)(message)).GetSender()));	//envoi de la reponse au message
 								}
 							}
 							break;
 						}
 						case "bloc" : {	//diffuser le bloc a ces voisin sauf celui qui en est l'emeteur
 							for(Node neighbor : neighbors) {
-								if(((Bloc)(message)).GetSender() == neighbor.getName()) {
+								if(((Bloc)(message)).GetSender() == neighbor.getName()) {	//si le message provient d'un noeud voisin alors on le traite
 									String blocDigest = "";
 									blocDigest.concat(((Bloc)(message)).GetBlock().nonce.toString());
 									blocDigest.concat(((Bloc)(message)).GetBlock().data);
 									blocDigest.concat(blockchain.get(blockchain.size() - 1).hash);
-									if(ValidHash(blocDigest) == true) {
+									if(ValidHash(blocDigest) == true) {	//validation du bloc
 										for(Node neighbour : neighbors) {
 											if(neighbour != neighbor) {
-												neighbour.PostMessage(new Bloc(thisNode, neighbour.getName(), ((Bloc)(message)).GetBlock()));
+												neighbour.PostMessage(new Bloc(thisNode, neighbour.getName(), ((Bloc)(message)).GetBlock()));	//transfer le bloc aux noeud voisins sauf celui qui en est l'emetteur
+												awaitReply.add(new Bloc(thisNode, neighbour.getName(), ((Bloc)(message)).GetBlock()));	//ajout du message a la liste d'attente de reponse
 											}
 										}
+										GetNode(((Bloc)(message)).GetSender()).PostMessage(new Sync(thisNode, ((Bloc)(message)).GetSender()));	//envoi de la reponse message au noeud emetteur
 									}
 								}
 							}
 							break;
 						}
-						case "link" : {	//ignorer ces message
+						case "link" : {	//ignorer ce type de message
 							//ne rien faire
 							break;
 						}
@@ -136,17 +141,23 @@ class Node extends Thread {
 									blocDigest.concat(blockchain.get(blockchain.size() - 1).hash);
 									if(ValidHash(blocDigest) == true) {
 										blockchain.add(((Give)(message)).GetBlock());
+										for(Message waitReply : awaitReply) {
+											if(waitReply.GetReceiver() == ((Give)(message)).GetSender() && waitReply.GetFlag() == "requ") {
+												awaitReply.remove(waitReply);
+											}
+										}
 									}
 								}
 							}
 							break;
 						}
-						case "requ" : {	//ignorer ces message
+						case "requ" : {	//ignorer ce type de message
 							//ne rien faire
 							break;
 						}
 					}
 				}
+				//verifier liste d'attente reponse et suprimmer les lien avec les noeud qui ne reponde plus
 			}
 		}
 		while(true) {
