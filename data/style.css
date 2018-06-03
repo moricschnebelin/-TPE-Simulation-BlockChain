@@ -1,0 +1,16 @@
+graph {
+	fill-mode: gradient-diagonal1;  
+}
+
+node {
+	size: 20px;
+	fill-mode: image-scaled; 
+	fill-image: url('data/user.png');
+	text-alignment: at-right; text-padding: 3px, 2px; text-background-mode: rounded-box; text-background-color: #A7CC; text-color: white; text-style: bold-italic; text-color: #FFF; text-offset: 5px, 0px;
+}
+
+edge {
+	fill-color: black;
+	size: 1px;
+}
+

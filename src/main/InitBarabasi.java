@@ -10,12 +10,14 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.graphstream.algorithm.generator.Generator;
+import org.graphstream.algorithm.generator.RandomGenerator;
 
-public class InitRandom {
+public class InitBarabasi {
 	
 	static Graph blockchain = new SingleGraph("Blockchain Network");
 	static ThreadGroup nodesGroup = new ThreadGroup("Nodes Group");
-	
+
 	int sommets = blockchain.getNodeCount();
 	static ArrayList<Double> dist = new ArrayList<Double>();
 	double distMoy = 0.0;
@@ -27,39 +29,25 @@ public class InitRandom {
 	
 	static void PrimeGraph(int numberOfNodes) throws InterruptedException {	//initialisation du graph avec un noeud primaire
 		//création des noeuds
-		for(int i = 0; i < numberOfNodes; i++) {
 
-			blockchain.addNode(GenerateId()).addAttribute("ui.label", i + "(" + GenerateId() + ")"); // annee:mois:jour:heure:minute:seconde:milliseconde
-			
-			TimeUnit.MILLISECONDS.sleep(1); // attends 1 ms pour avoir un label différent pour chaque noeuds
+		// entre 1 et 3 liens par noeuds ajoutes
+		Generator gen = new BarabasiAlbertGenerator(3);
+		gen.addSink(blockchain); 
+		gen.begin();
+		for(int i=0; i<numberOfNodes; i++) {
+			gen.nextEvents();
 		}
+		gen.end();
 		
-		//liaisons random entre chaque noeud
-		for(Node n : blockchain){
-			int i = 0;
-			while(i != 2) {
-				boolean isvoisin = false;
-				Node nRand = Toolkit.randomNode(blockchain);
-				for(Edge e : n) {
-					Node voisin = e.getOpposite(n);
-					if(nRand == voisin) {
-						isvoisin = true;
-					}
-					if(isvoisin)
-						break;
-				}
-				if(nRand != n && isvoisin == false) {
-					blockchain.addEdge(GenerateId(), n, nRand);
-					i++;
-					TimeUnit.MILLISECONDS.sleep(1); //millisecondes
-				}
-			}
-		}
+	    for(int i = 0; i <= numberOfNodes+1; i++) {
+	    	Node n = blockchain.getNode(i);
+	    	n.addAttribute("ui.label", "(" + GenerateId() + ")");
+	    	TimeUnit.MILLISECONDS.sleep(1);
+	    }
 		
 	}
 	
 	static Graph GetBlockChain() {	//recuperation du graph
 		return blockchain;
 	}
-
 }

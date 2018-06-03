@@ -14,17 +14,17 @@ import org.graphstream.algorithm.Toolkit;
 class Node extends Thread {
 	
 	String thisNode = Thread.currentThread().getName();	//nom du thread courant
-	List<Node> neighbors = new ArrayList<Node>();	//liste des voisin
+	List<Node> neighbors = new ArrayList<Node>();	//liste des voisins
 	Queue<Message> messageQueue = new LinkedList<Message>();	//file d'attente FIFO de message
 	Message message;	//message a traiter
 	List<Message> awaitReply = new ArrayList<Message>();	//liste de message qui attende une reponse "sync"
-	List<String> dataToArchive = new ArrayList<String>();	//transaction a integré dans le prochain bloc
+	List<String> dataToArchive = new ArrayList<String>();	//transaction a integrer dans le prochain bloc
 	List<String> dataInArchiving = new ArrayList<String>();	//transaction en cours d'integration dans le bloc courant
 	List<Block> blockchain = new ArrayList<Block>();	//chaine de bloc
 	
-	Node GetNode(String name) {	//retourne un noeud correspondant au nom passer en parametre
-		Thread[] threads = new Thread[Initialisation.nodesGroup.activeCount()];
-		Initialisation.nodesGroup.enumerate(threads);
+	Node GetNode(String name) {	//retourne un noeud correspondant au nom passÃ© en parametre
+		Thread[] threads = new Thread[InitRandom.nodesGroup.activeCount()];
+		InitRandom.nodesGroup.enumerate(threads);
 		for(Thread thread : threads) {
 			if(thread.getName() == name) {
 				return (Node)(thread);
@@ -37,7 +37,7 @@ class Node extends Thread {
 		return (Node)(neighbors.get(ThreadLocalRandom.current().nextInt(neighbors.size())));
 	}
 	
-	void PostMessage(Message message) {	//ajoute les message envoyer par les autre thread dans la file d'attente messageQueue
+	void PostMessage(Message message) {	//ajoute les message envoyer par les autres threads dans la file d'attente messageQueue
 		messageQueue.add(message);
 	}
 	
@@ -61,7 +61,7 @@ class Node extends Thread {
 		blockchain.add(new Block(null, "", "00000000000000000000000000000000"));	//genesis block
 		if(neighbors.size() == 0) {	//partie de code ignorer par les noeuds initiaux
 			while(neighbors.size() < 2) {	//tant que le noeud ne possede pas n liaison, il les cree avec d'autre noeud aleatoire du reseau
-				String randomNode = Toolkit.randomNode(Initialisation.blockchain).getId();
+				String randomNode = Toolkit.randomNode(InitRandom.blockchain).getId();
 				if(randomNode != thisNode) {
 					boolean validNode = true;
 					for(Thread neighbor : neighbors) {
@@ -72,11 +72,11 @@ class Node extends Thread {
 					}
 					if(validNode == true) {
 						neighbors.add(GetNode(randomNode));
-						Initialisation.blockchain.addEdge(Initialisation.GenerateId(), thisNode, randomNode);
+						InitRandom.blockchain.addEdge(InitRandom.GenerateId(), thisNode, randomNode);
 					}
 				}
 			}
-			while(true) {	//tant que le noeud ne possede pas tous les bloc de la blockchain, il les demande consecutivement parmis ses voisins de maniere aleatoire
+			while(true) {	//tant que le noeud ne possedent pas tous les blocs de la blockchain, il les demande consecutivement parmis ses voisins de maniere aleatoire
 				Node randomNeighbor = GetRandomNeighbor();
 				randomNeighbor.PostMessage(new Requ(thisNode, randomNeighbor.getName(), blockchain.size()));
 				awaitReply.add(new Requ(thisNode, randomNeighbor.getName(), blockchain.size()));

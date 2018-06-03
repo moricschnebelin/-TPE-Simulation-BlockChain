@@ -9,9 +9,9 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 
-public class SimulationRandom {
+public class SimulationBarabasi {
 
-	static Graph blockchain = InitRandom.GetBlockChain();
+	static Graph blockchain = InitBarabasi.GetBlockChain();
 	
 	static String GenerateId() {
 		return LocalDate.now(Clock.systemUTC()).toString().concat(":"+LocalTime.now(Clock.systemUTC()).toString()).replaceAll("[-.]", ":"); // annee:mois:jour:heure:minute:seconde:milliseconde
@@ -41,18 +41,12 @@ public class SimulationRandom {
 		
 		String id_newNode = GenerateId();
 		Node randomNode1 = Toolkit.randomNode(blockchain);
-		Node randomNode2 = Toolkit.randomNode(blockchain);
-		while(randomNode2 == randomNode1){
-			randomNode2 = Toolkit.randomNode(blockchain);
-			
-		}
 		
 		blockchain.addNode(id_newNode).addAttribute("ui.label", "(" + id_newNode + ")");
 		Node newNode = blockchain.getNode(id_newNode);
 		
 		blockchain.addEdge(GenerateId(), newNode, randomNode1);
 		TimeUnit.MILLISECONDS.sleep(1);
-		blockchain.addEdge(GenerateId(), newNode, randomNode2);
 		
 	}
 }
